@@ -2,6 +2,20 @@
 Extremely lightweight and purpose-built feature extraction and retrieval engine (FERE).
 
 ## Usage
+To configure the pgvector PostgreSQL connection, create a file `config.json` in the root directory with the following content:
+
+```json
+{
+  "DBHOST": "<host>",
+  "DBPORT": "<port>",
+  "DBNAME": "<name>",
+  "DBUSER": "<user>",
+  "DBPASSWORD": "<password>"
+}
+```
+
+```bash
+
 To run the server, please execute the following from the root directory:
 
 ```
