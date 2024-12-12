@@ -1,6 +1,9 @@
 import psycopg2
+import torch
 from flask import current_app
+from pgvector.psycopg2 import register_vector
 
+from ferelight.controllers import tokenizer, model
 from ferelight.models import Scoredsegment
 from ferelight.models.multimediaobject import Multimediaobject  # noqa: E501
 from ferelight.models.multimediasegment import Multimediasegment  # noqa: E501
@@ -92,18 +95,55 @@ def query_post(body):  # noqa: E501
     :rtype: Union[List[QueryPost200ResponseInner], Tuple[List[QueryPost200ResponseInner], int], Tuple[List[QueryPost200ResponseInner], int, Dict[str, str]]
     """
     limit = f'LIMIT {body["resultslimit"]}' if 'resultslimit' in body else ''
+
+    similarity_vector = []
+    if 'similaritytext' in body:
+        text = tokenizer(body['similaritytext'])
+        with torch.no_grad():
+            text_features = model.encode_text(text)
+            text_features /= text_features.norm(dim=-1, keepdim=True)
+            similarity_vector = text_features.cpu().numpy().flatten()
+
     with get_connection() as conn:
         cur = conn.cursor()
+        cur.execute('CREATE EXTENSION IF NOT EXISTS vector')
+        register_vector(conn)
         if 'ocrtext' in body and not 'similaritytext' in body:
             cur.execute(
                 f"""
-                    SELECT id, 1 
+                    SELECT id, 0 AS distance
                     FROM features_ocr WHERE feature @@ to_tsquery(%s)
                     {limit}
                 """,
                 (body['ocrtext'],))
+        elif 'similaritytext' in body and not 'ocrtext' in body:
+            # Get cosine similarity as score
+            cur.execute(
+                f"""
+                    SELECT id, feature <=> %s AS distance
+                    FROM features_openclip
+                    ORDER BY distance
+                    {limit}
+                """,
+                (similarity_vector,))
+        elif 'ocrtext' in body and 'similaritytext' in body:
+            cur.execute(
+                f"""
+                    SELECT id, feature <=> %s AS distance
+                    FROM features_openclip
+                    WHERE id IN (
+                        SELECT id
+                        FROM features_ocr
+                        WHERE feature @@ to_tsquery(%s)
+                    )
+                    ORDER BY distance
+                    {limit}
+                """,
+                (similarity_vector, body['ocrtext'])
+            )
+
         results = cur.fetchall()
-        scored_segments = [Scoredsegment(segmentid=segmentid, score=score) for (segmentid, score) in
+        scored_segments = [Scoredsegment(segmentid=segmentid, score=1 - distance) for (segmentid, distance) in
                            results]
         return scored_segments
 
