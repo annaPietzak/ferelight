@@ -67,3 +67,6 @@ target/
 
 # PyCharm
 .idea/
+
+# Config with credentials
+config.json

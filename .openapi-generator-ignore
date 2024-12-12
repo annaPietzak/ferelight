@@ -24,3 +24,4 @@
 .gitignore
 README.md
 requirements.txt
+ferelight/__main__.py
