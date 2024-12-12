@@ -1,0 +1,80 @@
+openapi: 3.0.1
+info:
+  description: API for the lightweight feature extraction and retrieval engine (FERElight).
+  title: FERElight
+  version: 1.0.0
+servers:
+- url: /
+paths:
+  /objectinfo/{objectid}:
+    get:
+      operationId: objectinfo_objectid_get
+      parameters:
+      - description: The unique identifier of the object.
+        explode: false
+        in: path
+        name: objectid
+        required: true
+        schema:
+          type: string
+        style: simple
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/multimediaobject'
+          description: OK
+      summary: Get the information of an object.
+      x-openapi-router-controller: ferelight.controllers.default_controller
+components:
+  schemas:
+    multimediaobject:
+      example:
+        path: path
+        name: name
+        mediatype: 0
+        objectid: objectid
+      properties:
+        objectid:
+          description: The unique identifier of the object.
+          title: objectid
+          type: string
+        mediatype:
+          description: The mediatype enum value of the object.
+          title: mediatype
+          type: integer
+        name:
+          description: The name of the object.
+          title: name
+          type: string
+        path:
+          description: The path of the object.
+          title: path
+          type: string
+      title: multimediaobject
+      type: object
+    multimediasegment:
+      properties:
+        segmentid:
+          description: The unique identifier of the segment.
+          type: string
+        objectid:
+          description: The unique identifier of the object.
+          type: string
+        segmentnumber:
+          description: The segment number.
+          type: integer
+        segmentstart:
+          description: The start frame of the segment.
+          type: number
+        segmentend:
+          description: The end frame of the segment.
+          type: number
+        segmentstartabs:
+          description: The double value of the start time in seconds of the segment.
+          type: number
+        segmentendabs:
+          description: The double value of the end time in seconds of the segment.
+          type: number
+      type: object
