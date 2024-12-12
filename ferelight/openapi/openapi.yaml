@@ -85,7 +85,7 @@ paths:
             application/json:
               schema:
                 items:
-                  $ref: '#/components/schemas/_query_post_200_response_inner'
+                  $ref: '#/components/schemas/scoredsegment'
                 type: array
           description: OK
       summary: Query the FERElight engine.
@@ -198,6 +198,21 @@ components:
           type: number
       title: multimediasegment
       type: object
+    scoredsegment:
+      example:
+        score: 0.8008281904610115
+        segmentid: segmentid
+      properties:
+        segmentid:
+          description: The unique identifier of the segment.
+          title: segmentid
+          type: string
+        score:
+          description: The similarity score of the segment.
+          title: score
+          type: number
+      title: scoredsegment
+      type: object
     _objectinfos_post_request:
       properties:
         objectids:
@@ -228,20 +243,9 @@ components:
           description: The OCR text.
           title: ocrtext
           type: string
+        limit:
+          description: The maximum number of results to return.
+          title: limit
+          type: integer
       title: _query_post_request
-      type: object
-    _query_post_200_response_inner:
-      example:
-        score: 0.8008281904610115
-        segmentid: segmentid
-      properties:
-        segmentid:
-          description: The unique identifier of the segment.
-          title: segmentid
-          type: string
-        score:
-          description: The similarity score of the segment.
-          title: score
-          type: number
-      title: _query_post_200_response_inner
       type: object

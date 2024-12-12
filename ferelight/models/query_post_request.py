@@ -12,26 +12,31 @@ class QueryPostRequest(Model):
     Do not edit the class manually.
     """
 
-    def __init__(self, similaritytext=None, ocrtext=None):  # noqa: E501
+    def __init__(self, similaritytext=None, ocrtext=None, limit=None):  # noqa: E501
         """QueryPostRequest - a model defined in OpenAPI
 
         :param similaritytext: The similaritytext of this QueryPostRequest.  # noqa: E501
         :type similaritytext: str
         :param ocrtext: The ocrtext of this QueryPostRequest.  # noqa: E501
         :type ocrtext: str
+        :param limit: The limit of this QueryPostRequest.  # noqa: E501
+        :type limit: int
         """
         self.openapi_types = {
             'similaritytext': str,
-            'ocrtext': str
+            'ocrtext': str,
+            'limit': int
         }
 
         self.attribute_map = {
             'similaritytext': 'similaritytext',
-            'ocrtext': 'ocrtext'
+            'ocrtext': 'ocrtext',
+            'limit': 'limit'
         }
 
         self._similaritytext = similaritytext
         self._ocrtext = ocrtext
+        self._limit = limit
 
     @classmethod
     def from_dict(cls, dikt) -> 'QueryPostRequest':
@@ -89,3 +94,26 @@ class QueryPostRequest(Model):
         """
 
         self._ocrtext = ocrtext
+
+    @property
+    def limit(self) -> int:
+        """Gets the limit of this QueryPostRequest.
+
+        The maximum number of results to return.  # noqa: E501
+
+        :return: The limit of this QueryPostRequest.
+        :rtype: int
+        """
+        return self._limit
+
+    @limit.setter
+    def limit(self, limit: int):
+        """Sets the limit of this QueryPostRequest.
+
+        The maximum number of results to return.  # noqa: E501
+
+        :param limit: The limit of this QueryPostRequest.
+        :type limit: int
+        """
+
+        self._limit = limit

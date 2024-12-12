@@ -1,9 +1,9 @@
 import psycopg2
 from flask import current_app
 
+from ferelight.models import Scoredsegment
 from ferelight.models.multimediaobject import Multimediaobject  # noqa: E501
 from ferelight.models.multimediasegment import Multimediasegment  # noqa: E501
-from ferelight.models.query_post200_response_inner import QueryPost200ResponseInner  # noqa: E501
 
 
 def get_connection():
@@ -103,7 +103,7 @@ def query_post(body):  # noqa: E501
                 """,
                 (body['ocrtext'],))
         results = cur.fetchall()
-        scored_segments = [QueryPost200ResponseInner(segmentid=segmentid, score=score) for (segmentid, score) in
+        scored_segments = [Scoredsegment(segmentid=segmentid, score=score) for (segmentid, score) in
                            results]
         return scored_segments
 

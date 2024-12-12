@@ -2,7 +2,6 @@
 .travis.yml
 Dockerfile
 ferelight/__init__.py
-ferelight/__main__.py
 ferelight/controllers/__init__.py
 ferelight/controllers/default_controller.py
 ferelight/controllers/security_controller.py
@@ -12,8 +11,8 @@ ferelight/models/base_model.py
 ferelight/models/multimediaobject.py
 ferelight/models/multimediasegment.py
 ferelight/models/objectinfos_post_request.py
-ferelight/models/query_post200_response_inner.py
 ferelight/models/query_post_request.py
+ferelight/models/scoredsegment.py
 ferelight/models/segmentinfos_post_request.py
 ferelight/openapi/openapi.yaml
 ferelight/test/__init__.py
