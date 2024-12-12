@@ -14,8 +14,6 @@ To configure the pgvector PostgreSQL connection, create a file `config.json` in 
 }
 ```
 
-```bash
-
 To run the server, please execute the following from the root directory:
 
 ```
