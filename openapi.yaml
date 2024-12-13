@@ -33,10 +33,10 @@ components:
               type: integer
               description: The segment number.
             segmentstart:
-              type: number
+              type: integer
               description: The start frame of the segment.
             segmentend:
-              type: number
+              type: integer
               description: The end frame of the segment.
             segmentstartabs:
               type: number

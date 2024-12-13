@@ -160,10 +160,10 @@ components:
       type: object
     multimediasegment:
       example:
-        segmentend: 1.4658129805029452
+        segmentend: 1
         segmentnumber: 0
         segmentid: segmentid
-        segmentstart: 6.027456183070403
+        segmentstart: 6
         segmentstartabs: 5.962133916683182
         objectid: objectid
         segmentendabs: 5.637376656633329
@@ -183,11 +183,11 @@ components:
         segmentstart:
           description: The start frame of the segment.
           title: segmentstart
-          type: number
+          type: integer
         segmentend:
           description: The end frame of the segment.
           title: segmentend
-          type: number
+          type: integer
         segmentstartabs:
           description: The double value of the start time in seconds of the segment.
           title: segmentstartabs

@@ -22,9 +22,9 @@ class Multimediasegment(Model):
         :param segmentnumber: The segmentnumber of this Multimediasegment.  # noqa: E501
         :type segmentnumber: int
         :param segmentstart: The segmentstart of this Multimediasegment.  # noqa: E501
-        :type segmentstart: float
+        :type segmentstart: int
         :param segmentend: The segmentend of this Multimediasegment.  # noqa: E501
-        :type segmentend: float
+        :type segmentend: int
         :param segmentstartabs: The segmentstartabs of this Multimediasegment.  # noqa: E501
         :type segmentstartabs: float
         :param segmentendabs: The segmentendabs of this Multimediasegment.  # noqa: E501
@@ -34,8 +34,8 @@ class Multimediasegment(Model):
             'segmentid': str,
             'objectid': str,
             'segmentnumber': int,
-            'segmentstart': float,
-            'segmentend': float,
+            'segmentstart': int,
+            'segmentend': int,
             'segmentstartabs': float,
             'segmentendabs': float
         }
@@ -139,47 +139,47 @@ class Multimediasegment(Model):
         self._segmentnumber = segmentnumber
 
     @property
-    def segmentstart(self) -> float:
+    def segmentstart(self) -> int:
         """Gets the segmentstart of this Multimediasegment.
 
         The start frame of the segment.  # noqa: E501
 
         :return: The segmentstart of this Multimediasegment.
-        :rtype: float
+        :rtype: int
         """
         return self._segmentstart
 
     @segmentstart.setter
-    def segmentstart(self, segmentstart: float):
+    def segmentstart(self, segmentstart: int):
         """Sets the segmentstart of this Multimediasegment.
 
         The start frame of the segment.  # noqa: E501
 
         :param segmentstart: The segmentstart of this Multimediasegment.
-        :type segmentstart: float
+        :type segmentstart: int
         """
 
         self._segmentstart = segmentstart
 
     @property
-    def segmentend(self) -> float:
+    def segmentend(self) -> int:
         """Gets the segmentend of this Multimediasegment.
 
         The end frame of the segment.  # noqa: E501
 
         :return: The segmentend of this Multimediasegment.
-        :rtype: float
+        :rtype: int
         """
         return self._segmentend
 
     @segmentend.setter
-    def segmentend(self, segmentend: float):
+    def segmentend(self, segmentend: int):
         """Sets the segmentend of this Multimediasegment.
 
         The end frame of the segment.  # noqa: E501
 
         :param segmentend: The segmentend of this Multimediasegment.
-        :type segmentend: float
+        :type segmentend: int
         """
 
         self._segmentend = segmentend

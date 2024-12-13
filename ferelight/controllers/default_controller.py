@@ -94,7 +94,7 @@ def query_post(body):  # noqa: E501
 
     :rtype: Union[List[QueryPost200ResponseInner], Tuple[List[QueryPost200ResponseInner], int], Tuple[List[QueryPost200ResponseInner], int, Dict[str, str]]
     """
-    limit = f'LIMIT {body["resultslimit"]}' if 'resultslimit' in body else ''
+    limit = f'LIMIT {body["limit"]}' if 'limit' in body else ''
 
     similarity_vector = []
     if 'similaritytext' in body:
