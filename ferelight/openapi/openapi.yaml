@@ -6,10 +6,18 @@ info:
 servers:
 - url: /
 paths:
-  /objectinfo/{objectid}:
+  /objectinfo/{database}/{objectid}:
     get:
-      operationId: objectinfo_objectid_get
+      operationId: objectinfo_database_objectid_get
       parameters:
+      - description: The name of the database to query for the object.
+        explode: false
+        in: path
+        name: database
+        required: true
+        schema:
+          type: string
+        style: simple
       - description: The unique identifier of the object.
         explode: false
         in: path
@@ -47,10 +55,18 @@ paths:
           description: OK
       summary: Get the information of multiple objects.
       x-openapi-router-controller: ferelight.controllers.default_controller
-  /objectsegments/{objectid}:
+  /objectsegments/{database}/{objectid}:
     get:
-      operationId: objectsegments_objectid_get
+      operationId: objectsegments_database_objectid_get
       parameters:
+      - description: The name of the database to query for the object.
+        explode: false
+        in: path
+        name: database
+        required: true
+        schema:
+          type: string
+        style: simple
       - description: The unique identifier of the object.
         explode: false
         in: path
@@ -90,10 +106,18 @@ paths:
           description: OK
       summary: Query the FERElight engine.
       x-openapi-router-controller: ferelight.controllers.default_controller
-  /segmentinfo/{segmentid}:
+  /segmentinfo/{database}/{segmentid}:
     get:
-      operationId: segmentinfo_segmentid_get
+      operationId: segmentinfo_database_segmentid_get
       parameters:
+      - description: The name of the database to query for the segment.
+        explode: false
+        in: path
+        name: database
+        required: true
+        schema:
+          type: string
+        style: simple
       - description: The unique identifier of the segment.
         explode: false
         in: path
@@ -215,6 +239,10 @@ components:
       type: object
     _objectinfos_post_request:
       properties:
+        database:
+          description: The name of the database to query for the objects.
+          title: database
+          type: string
         objectids:
           description: The unique identifiers of the objects.
           items:
@@ -225,6 +253,10 @@ components:
       type: object
     _segmentinfos_post_request:
       properties:
+        database:
+          description: The name of the database to query for the segments.
+          title: database
+          type: string
         segmentids:
           description: The unique identifiers of the segments.
           items:
@@ -235,6 +267,10 @@ components:
       type: object
     _query_post_request:
       properties:
+        database:
+          description: The name of the database to query.
+          title: database
+          type: string
         similaritytext:
           description: The similarity text.
           title: similaritytext

@@ -54,10 +54,16 @@ components:
               type: number
               description: The similarity score of the segment.
 paths:
-  /objectinfo/{objectid}:
+  /objectinfo/{database}/{objectid}:
     get:
       summary: Get the information of an object.
       parameters:
+        - name: database
+          in: path
+          required: true
+          description: The name of the database to query for the object.
+          schema:
+            type: string
         - name: objectid
           in: path
           required: true
@@ -71,10 +77,16 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/multimediaobject"
-  /segmentinfo/{segmentid}:
+  /segmentinfo/{database}/{segmentid}:
     get:
       summary: Get the information of a segment.
       parameters:
+        - name: database
+          in: path
+          required: true
+          description: The name of the database to query for the segment.
+          schema:
+            type: string
         - name: segmentid
           in: path
           required: true
@@ -88,10 +100,16 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/multimediasegment"
-  /objectsegments/{objectid}:
+  /objectsegments/{database}/{objectid}:
     get:
       summary: Get the segments of an object.
       parameters:
+        - name: database
+          in: path
+          required: true
+          description: The name of the database to query for the object.
+          schema:
+            type: string
         - name: objectid
           in: path
           required: true
@@ -117,6 +135,9 @@ paths:
             schema:
               type: object
               properties:
+                database:
+                  type: string
+                  description: The name of the database to query for the objects.
                 objectids:
                   type: array
                   items:
@@ -141,6 +162,9 @@ paths:
             schema:
               type: object
               properties:
+                database:
+                  type: string
+                  description: The name of the database to query for the segments.
                 segmentids:
                   type: array
                   items:
@@ -166,6 +190,9 @@ paths:
             schema:
               type: object
               properties:
+                database:
+                  type: string
+                  description: The name of the database to query.
                 similaritytext:
                   type: string
                   description: The similarity text.

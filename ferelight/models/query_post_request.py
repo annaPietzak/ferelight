@@ -12,9 +12,11 @@ class QueryPostRequest(Model):
     Do not edit the class manually.
     """
 
-    def __init__(self, similaritytext=None, ocrtext=None, limit=None):  # noqa: E501
+    def __init__(self, database=None, similaritytext=None, ocrtext=None, limit=None):  # noqa: E501
         """QueryPostRequest - a model defined in OpenAPI
 
+        :param database: The database of this QueryPostRequest.  # noqa: E501
+        :type database: str
         :param similaritytext: The similaritytext of this QueryPostRequest.  # noqa: E501
         :type similaritytext: str
         :param ocrtext: The ocrtext of this QueryPostRequest.  # noqa: E501
@@ -23,17 +25,20 @@ class QueryPostRequest(Model):
         :type limit: int
         """
         self.openapi_types = {
+            'database': str,
             'similaritytext': str,
             'ocrtext': str,
             'limit': int
         }
 
         self.attribute_map = {
+            'database': 'database',
             'similaritytext': 'similaritytext',
             'ocrtext': 'ocrtext',
             'limit': 'limit'
         }
 
+        self._database = database
         self._similaritytext = similaritytext
         self._ocrtext = ocrtext
         self._limit = limit
@@ -48,6 +53,29 @@ class QueryPostRequest(Model):
         :rtype: QueryPostRequest
         """
         return util.deserialize_model(dikt, cls)
+
+    @property
+    def database(self) -> str:
+        """Gets the database of this QueryPostRequest.
+
+        The name of the database to query.  # noqa: E501
+
+        :return: The database of this QueryPostRequest.
+        :rtype: str
+        """
+        return self._database
+
+    @database.setter
+    def database(self, database: str):
+        """Sets the database of this QueryPostRequest.
+
+        The name of the database to query.  # noqa: E501
+
+        :param database: The database of this QueryPostRequest.
+        :type database: str
+        """
+
+        self._database = database
 
     @property
     def similaritytext(self) -> str:

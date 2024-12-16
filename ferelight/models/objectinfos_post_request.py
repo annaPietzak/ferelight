@@ -12,20 +12,25 @@ class ObjectinfosPostRequest(Model):
     Do not edit the class manually.
     """
 
-    def __init__(self, objectids=None):  # noqa: E501
+    def __init__(self, database=None, objectids=None):  # noqa: E501
         """ObjectinfosPostRequest - a model defined in OpenAPI
 
+        :param database: The database of this ObjectinfosPostRequest.  # noqa: E501
+        :type database: str
         :param objectids: The objectids of this ObjectinfosPostRequest.  # noqa: E501
         :type objectids: List[str]
         """
         self.openapi_types = {
+            'database': str,
             'objectids': List[str]
         }
 
         self.attribute_map = {
+            'database': 'database',
             'objectids': 'objectids'
         }
 
+        self._database = database
         self._objectids = objectids
 
     @classmethod
@@ -38,6 +43,29 @@ class ObjectinfosPostRequest(Model):
         :rtype: ObjectinfosPostRequest
         """
         return util.deserialize_model(dikt, cls)
+
+    @property
+    def database(self) -> str:
+        """Gets the database of this ObjectinfosPostRequest.
+
+        The name of the database to query for the objects.  # noqa: E501
+
+        :return: The database of this ObjectinfosPostRequest.
+        :rtype: str
+        """
+        return self._database
+
+    @database.setter
+    def database(self, database: str):
+        """Sets the database of this ObjectinfosPostRequest.
+
+        The name of the database to query for the objects.  # noqa: E501
+
+        :param database: The database of this ObjectinfosPostRequest.
+        :type database: str
+        """
+
+        self._database = database
 
     @property
     def objectids(self) -> List[str]:

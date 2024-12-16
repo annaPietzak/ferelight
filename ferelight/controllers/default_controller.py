@@ -9,23 +9,25 @@ from ferelight.models.multimediaobject import Multimediaobject  # noqa: E501
 from ferelight.models.multimediasegment import Multimediasegment  # noqa: E501
 
 
-def get_connection():
-    return psycopg2.connect(dbname=current_app.config['DBNAME'], user=current_app.config['DBUSER'],
+def get_connection(database):
+    return psycopg2.connect(dbname=database, user=current_app.config['DBUSER'],
                             password=current_app.config['DBPASSWORD'], host=current_app.config['DBHOST'],
                             port=current_app.config['DBPORT'])
 
 
-def objectinfo_objectid_get(objectid):  # noqa: E501
+def objectinfo_database_objectid_get(database, objectid):  # noqa: E501
     """Get the information of an object.
 
      # noqa: E501
 
+    :param database: The name of the database to query for the object.
+    :type database: str
     :param objectid: The unique identifier of the object.
     :type objectid: str
 
     :rtype: Union[Multimediaobject, Tuple[Multimediaobject, int], Tuple[Multimediaobject, int, Dict[str, str]]
     """
-    with get_connection() as conn:
+    with get_connection(database) as conn:
         cur = conn.cursor()
         cur.execute(f"""SELECT objectid, mediatype, name, path FROM cineast_multimediaobject WHERE objectid = %s""",
                     (objectid,))
@@ -38,12 +40,12 @@ def objectinfos_post(body):  # noqa: E501
 
      # noqa: E501
 
-    :param objectinfos_post_request: 
+    :param objectinfos_post_request:
     :type objectinfos_post_request: dict | bytes
 
     :rtype: Union[List[Multimediaobject], Tuple[List[Multimediaobject], int], Tuple[List[Multimediaobject], int, Dict[str, str]]
     """
-    with get_connection() as conn:
+    with get_connection(body['database']) as conn:
         cur = conn.cursor()
         cur.execute(
             f"""SELECT objectid, mediatype, name, path FROM cineast_multimediaobject WHERE objectid = ANY(%s)""",
@@ -56,17 +58,19 @@ def objectinfos_post(body):  # noqa: E501
     return object_infos
 
 
-def objectsegments_objectid_get(objectid):  # noqa: E501
+def objectsegments_database_objectid_get(database, objectid):  # noqa: E501
     """Get the segments of an object.
 
      # noqa: E501
 
+    :param database: The name of the database to query for the object.
+    :type database: str
     :param objectid: The unique identifier of the object.
     :type objectid: str
 
     :rtype: Union[List[Multimediasegment], Tuple[List[Multimediasegment], int], Tuple[List[Multimediasegment], int, Dict[str, str]]
     """
-    with get_connection() as conn:
+    with get_connection(database) as conn:
         cur = conn.cursor()
         cur.execute(
             f"""
@@ -89,10 +93,10 @@ def query_post(body):  # noqa: E501
 
      # noqa: E501
 
-    :param query_post_request: 
+    :param query_post_request:
     :type query_post_request: dict | bytes
 
-    :rtype: Union[List[QueryPost200ResponseInner], Tuple[List[QueryPost200ResponseInner], int], Tuple[List[QueryPost200ResponseInner], int, Dict[str, str]]
+    :rtype: Union[List[Scoredsegment], Tuple[List[Scoredsegment], int], Tuple[List[Scoredsegment], int, Dict[str, str]]
     """
     limit = f'LIMIT {body["limit"]}' if 'limit' in body else ''
 
@@ -104,7 +108,7 @@ def query_post(body):  # noqa: E501
             text_features /= text_features.norm(dim=-1, keepdim=True)
             similarity_vector = text_features.cpu().numpy().flatten()
 
-    with get_connection() as conn:
+    with get_connection(body['database']) as conn:
         cur = conn.cursor()
         cur.execute('CREATE EXTENSION IF NOT EXISTS vector')
         register_vector(conn)
@@ -148,17 +152,19 @@ def query_post(body):  # noqa: E501
         return scored_segments
 
 
-def segmentinfo_segmentid_get(segmentid):  # noqa: E501
+def segmentinfo_database_segmentid_get(database, segmentid):  # noqa: E501
     """Get the information of a segment.
 
      # noqa: E501
 
+    :param database: The name of the database to query for the segment.
+    :type database: str
     :param segmentid: The unique identifier of the segment.
     :type segmentid: str
 
     :rtype: Union[Multimediasegment, Tuple[Multimediasegment, int], Tuple[Multimediasegment, int, Dict[str, str]]
     """
-    with get_connection() as conn:
+    with get_connection(database) as conn:
         cur = conn.cursor()
         cur.execute(f"""
             SELECT segmentid, objectid, segmentnumber, segmentstart, segmentend, segmentstartabs, segmentendabs 
@@ -176,12 +182,12 @@ def segmentinfos_post(body):  # noqa: E501
 
      # noqa: E501
 
-    :param segmentinfos_post_request: 
+    :param segmentinfos_post_request:
     :type segmentinfos_post_request: dict | bytes
 
     :rtype: Union[List[Multimediasegment], Tuple[List[Multimediasegment], int], Tuple[List[Multimediasegment], int, Dict[str, str]]
     """
-    with get_connection() as conn:
+    with get_connection(body['database']) as conn:
         cur = conn.cursor()
         cur.execute(
             f"""

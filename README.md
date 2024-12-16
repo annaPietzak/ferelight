@@ -8,7 +8,6 @@ To configure the pgvector PostgreSQL connection, create a file `config.json` in 
 {
   "DBHOST": "<host>",
   "DBPORT": "<port>",
-  "DBNAME": "<name>",
   "DBUSER": "<user>",
   "DBPASSWORD": "<password>"
 }

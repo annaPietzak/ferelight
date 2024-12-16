@@ -12,20 +12,25 @@ class SegmentinfosPostRequest(Model):
     Do not edit the class manually.
     """
 
-    def __init__(self, segmentids=None):  # noqa: E501
+    def __init__(self, database=None, segmentids=None):  # noqa: E501
         """SegmentinfosPostRequest - a model defined in OpenAPI
 
+        :param database: The database of this SegmentinfosPostRequest.  # noqa: E501
+        :type database: str
         :param segmentids: The segmentids of this SegmentinfosPostRequest.  # noqa: E501
         :type segmentids: List[str]
         """
         self.openapi_types = {
+            'database': str,
             'segmentids': List[str]
         }
 
         self.attribute_map = {
+            'database': 'database',
             'segmentids': 'segmentids'
         }
 
+        self._database = database
         self._segmentids = segmentids
 
     @classmethod
@@ -38,6 +43,29 @@ class SegmentinfosPostRequest(Model):
         :rtype: SegmentinfosPostRequest
         """
         return util.deserialize_model(dikt, cls)
+
+    @property
+    def database(self) -> str:
+        """Gets the database of this SegmentinfosPostRequest.
+
+        The name of the database to query for the segments.  # noqa: E501
+
+        :return: The database of this SegmentinfosPostRequest.
+        :rtype: str
+        """
+        return self._database
+
+    @database.setter
+    def database(self, database: str):
+        """Sets the database of this SegmentinfosPostRequest.
+
+        The name of the database to query for the segments.  # noqa: E501
+
+        :param database: The database of this SegmentinfosPostRequest.
+        :type database: str
+        """
+
+        self._database = database
 
     @property
     def segmentids(self) -> List[str]:

@@ -2,7 +2,6 @@
 .travis.yml
 Dockerfile
 ferelight/__init__.py
-ferelight/controllers/__init__.py
 ferelight/controllers/default_controller.py
 ferelight/controllers/security_controller.py
 ferelight/encoder.py
