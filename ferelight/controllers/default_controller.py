@@ -112,6 +112,9 @@ def query_post(body):  # noqa: E501
         cur = conn.cursor()
         cur.execute('CREATE EXTENSION IF NOT EXISTS vector')
         register_vector(conn)
+        # Set index parameter to allow for correct number of results
+        if 'limit' in body:
+            cur.execute('SET hnsw.ef_search = %s', (body['limit'],))
         if 'ocrtext' in body and not 'similaritytext' in body:
             cur.execute(
                 f"""
