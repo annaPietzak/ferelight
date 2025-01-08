@@ -119,7 +119,7 @@ def query_post(body):  # noqa: E501
             cur.execute(
                 f"""
                     SELECT id, 0 AS distance
-                    FROM features_ocr WHERE feature @@ to_tsquery(%s)
+                    FROM features_ocr WHERE feature @@ plainto_tsquery(%s)
                     {limit}
                 """,
                 (body['ocrtext'],))
@@ -141,7 +141,7 @@ def query_post(body):  # noqa: E501
                     WHERE id IN (
                         SELECT id
                         FROM features_ocr
-                        WHERE feature @@ to_tsquery(%s)
+                        WHERE feature @@ plainto_tsquery(%s)
                     )
                     ORDER BY distance
                     {limit}
