@@ -11,7 +11,10 @@ ferelight/models/multimediaobject.py
 ferelight/models/multimediasegment.py
 ferelight/models/objectinfos_post_request.py
 ferelight/models/query_post_request.py
+ferelight/models/querybyexample_post_request.py
 ferelight/models/scoredsegment.py
+ferelight/models/segmentbytime_post200_response.py
+ferelight/models/segmentbytime_post_request.py
 ferelight/models/segmentinfos_post_request.py
 ferelight/openapi/openapi.yaml
 ferelight/test/__init__.py
