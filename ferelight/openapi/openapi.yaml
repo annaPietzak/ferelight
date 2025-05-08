@@ -317,6 +317,10 @@ components:
           description: The OCR text.
           title: ocrtext
           type: string
+        asrtext:
+          description: The ASR text.
+          title: asrtext
+          type: string
         limit:
           description: The maximum number of results to return.
           title: limit

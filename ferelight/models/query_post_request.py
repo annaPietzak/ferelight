@@ -12,7 +12,7 @@ class QueryPostRequest(Model):
     Do not edit the class manually.
     """
 
-    def __init__(self, database=None, similaritytext=None, ocrtext=None, limit=None):  # noqa: E501
+    def __init__(self, database=None, similaritytext=None, ocrtext=None, asrtext=None, limit=None):  # noqa: E501
         """QueryPostRequest - a model defined in OpenAPI
 
         :param database: The database of this QueryPostRequest.  # noqa: E501
@@ -21,6 +21,8 @@ class QueryPostRequest(Model):
         :type similaritytext: str
         :param ocrtext: The ocrtext of this QueryPostRequest.  # noqa: E501
         :type ocrtext: str
+        :param asrtext: The asrtext of this QueryPostRequest.  # noqa: E501
+        :type asrtext: str
         :param limit: The limit of this QueryPostRequest.  # noqa: E501
         :type limit: int
         """
@@ -28,6 +30,7 @@ class QueryPostRequest(Model):
             'database': str,
             'similaritytext': str,
             'ocrtext': str,
+            'asrtext': str,
             'limit': int
         }
 
@@ -35,12 +38,14 @@ class QueryPostRequest(Model):
             'database': 'database',
             'similaritytext': 'similaritytext',
             'ocrtext': 'ocrtext',
+            'asrtext': 'asrtext',
             'limit': 'limit'
         }
 
         self._database = database
         self._similaritytext = similaritytext
         self._ocrtext = ocrtext
+        self._asrtext = asrtext
         self._limit = limit
 
     @classmethod
@@ -122,6 +127,29 @@ class QueryPostRequest(Model):
         """
 
         self._ocrtext = ocrtext
+
+    @property
+    def asrtext(self) -> str:
+        """Gets the asrtext of this QueryPostRequest.
+
+        The ASR text.  # noqa: E501
+
+        :return: The asrtext of this QueryPostRequest.
+        :rtype: str
+        """
+        return self._asrtext
+
+    @asrtext.setter
+    def asrtext(self, asrtext: str):
+        """Sets the asrtext of this QueryPostRequest.
+
+        The ASR text.  # noqa: E501
+
+        :param asrtext: The asrtext of this QueryPostRequest.
+        :type asrtext: str
+        """
+
+        self._asrtext = asrtext
 
     @property
     def limit(self) -> int:

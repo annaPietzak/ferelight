@@ -93,7 +93,7 @@ def objectsegments_database_objectid_get(database, objectid):  # noqa: E501
 
     return segmentinfos
 
-
+###########################################################
 def query_post(body):  # noqa: E501
     """Query the FERElight engine.
 
@@ -107,12 +107,15 @@ def query_post(body):  # noqa: E501
     limit = f'LIMIT {body["limit"]}' if 'limit' in body else ''
 
     similarity_vector = []
-    if 'similaritytext' in body:
-        text = tokenizer(body['similaritytext'])
-        with torch.no_grad():
-            text_features = model.encode_text(text)
-            text_features /= text_features.norm(dim=-1, keepdim=True)
-            similarity_vector = text_features.cpu().numpy().flatten()
+    if 'similaritytext' in body: similarity_vector = vectorize_textinput(body['similaritytext'])
+        # text = tokenizer(body['similaritytext'])
+        # with torch.no_grad():
+        #     text_features = model.encode_text(text)
+        #     text_features /= text_features.norm(dim=-1, keepdim=True)
+        #     similarity_vector = text_features.cpu().numpy().flatten()
+    # for test purposes
+    asr_vector = []
+    if 'asrtext' in body: asr_vector = vectorize_textinput(body['asrtext'])
 
     with get_connection(body['database']) as conn:
         cur = conn.cursor()
@@ -121,31 +124,66 @@ def query_post(body):  # noqa: E501
         # Set index parameter to allow for correct number of results
         if 'limit' in body:
             cur.execute('SET hnsw.ef_search = %s', (body['limit'],))
-        if 'ocrtext' in body and not 'similaritytext' in body:
-            cur.execute(
-                f"""
-                    SELECT id, 0 AS distance
-                    FROM features_ocr WHERE feature @@ plainto_tsquery(%s)
-                    {limit}
-                """,
-                (body['ocrtext'],))
-        elif 'similaritytext' in body and not 'ocrtext' in body:
-            # Get cosine similarity as score
-            cur.execute(
-                f"""
-                    SELECT id, feature <=> %s AS distance
-                    FROM features_openclip
-                    ORDER BY distance
-                    {limit}
-                """,
-                (similarity_vector,))
+
+        if 'ocrtext' in body and not 'similaritytext' in body and not 'asrtext' in body:
+            return ocrtext_query(cur, body, limit)
+
+        elif 'similaritytext' in body and not 'ocrtext' in body and not 'asrtext' in body:
+            inputs = body['similaritytext'].split('#')
+
+            tmp = []
+            for input in inputs:
+                vector = vectorize_textinput(input)
+                tmp += similaritytext_query(cur, vector, limit)
+            
+            tmp.sort(key=lambda x: x.segmentid)
+            result = []
+            i = 0
+            while i < (len(tmp) - len(inputs)):
+                avgElement = [tmp[i].segmentid, tmp[i].score, 1]
+                for j in range((i+1), (len(tmp) - 1 )):
+                    if tmp[i].segmentid == tmp[j].segmentid:
+                        avgElement[1] += tmp[j].score
+                        avgElement[2] += 1
+
+                if avgElement[2] >= len(inputs) :
+                    result.append(Scoredsegment(avgElement[0], (avgElement[1] / float(avgElement[2]))))
+                i += avgElement[2]
+            result.sort(key= lambda x: x.score)
+
+            return result
+        
+        elif 'asrtext' in body and not 'similaritytext' in body and not 'ocrtext' in body:
+            return asrtext_query(cur, body)
+        
         elif 'ocrtext' in body and 'similaritytext' in body:
+            # print("combine query")
+            # ocr = ocrtext_query(cur, body, limit)
+            # sim = similaritytext_query(cur, similarity_vector, limit)
+
+            # print("ocr ", len(ocr), "text ", len(sim))
+            # ocr.sort(key=lambda x: x.segmentid)
+            # sim.sort(key=lambda x: x.segmentid)
+            # a = [x.segmentid for x in ocr]
+            # b = [y.segmentid for y in sim]
+            # for i in sim:
+            #     for j in ocr:
+            #         if i.segmentid == j.segmentid:
+            #             print(i.segmentid, " matches ", j.segmentid)
+
+            # res = [(x.segmentid, (x.score + y.score)/2) for x in ocr for y in sim if x.segmentid == y.segmentid]
+            # print("a ", len(a), "b ", len(b))
+            # res = set(a) & set(b)
+            # print("result ", len(res))
+            # return ocr
+        
+            # this query is not behaving as expected, because the amount of results doesnt change based on the similaritytext but only based on the ocr text       
             cur.execute(
                 f"""
                     SELECT id, feature <=> %s AS distance
                     FROM features_openclip
                     WHERE id IN (
-                        SELECT id
+                        SELECT id 
                         FROM features_ocr
                         WHERE feature @@ plainto_tsquery(%s)
                     )
@@ -154,11 +192,59 @@ def query_post(body):  # noqa: E501
                 """,
                 (similarity_vector, body['ocrtext'])
             )
+        elif 'asrtext' in body and 'similaritytext' in body:
+            sim1 = similaritytext_query(cur, similarity_vector, limit)
+            sim2 = similaritytext_query(cur, asr_vector, limit)
 
-        results = cur.fetchall()
-        scored_segments = [Scoredsegment(segmentid=segmentid, score=1 - distance) for (segmentid, distance) in results]
-        return scored_segments
+            for i in sim1:
+                for j in sim2:
+                    if i.segmentid == j.segmentid:
+                        print(i.segmentid, " matches ", j.segmentid)
 
+        return evaluate_cursor(cur)
+
+# helping functions for query
+def vectorize_textinput(input):
+    text = tokenizer(input)
+    with torch.no_grad():
+        text_features = model.encode_text(text)
+        text_features /= text_features.norm(dim=-1, keepdim=True)
+        return text_features.cpu().numpy().flatten()
+
+def similaritytext_query(cur, similarity_vector, limit):
+    # Get cosine similarity as score
+    cur.execute(
+        f"""
+            SELECT id, feature <=> %s AS distance
+            FROM features_openclip
+            ORDER BY distance
+            {limit}
+        """,
+        (similarity_vector,))
+    
+    return evaluate_cursor(cur)
+
+def ocrtext_query(cur, body, limit):
+    cur.execute(
+        f"""
+            SELECT id, 0 AS distance
+            FROM features_ocr WHERE feature @@ plainto_tsquery(%s)
+            {limit}
+        """,
+        (body['ocrtext'],))
+    
+    return evaluate_cursor(cur)
+
+def asrtext_query(cur, body):
+    return 'TODO: ASR Features'
+
+def evaluate_cursor(cur):
+    results = cur.fetchall()
+    scored_segments = [Scoredsegment(segmentid=segmentid, score=1 - distance) for (segmentid, distance) in results]
+    print("Amount of results", len(scored_segments))
+    return scored_segments
+
+#######################################################
 
 def segmentinfo_database_segmentid_get(database, segmentid):  # noqa: E501
     """Get the information of a segment.

@@ -179,7 +179,7 @@ paths:
                 type: array
                 items:
                   $ref: "#/components/schemas/multimediasegment"
-  # Query endpoint with similarity text and OCR text as input and list of segment ID and similarity score pairs as output
+  # Query endpoint with similarity text, OCR and ASR text as input and list of segment ID and similarity score pairs as output
   /query:
     post:
       summary: Query the FERElight engine.
@@ -199,6 +199,9 @@ paths:
                 ocrtext:
                   type: string
                   description: The OCR text.
+                asrtext:
+                  type: string
+                  description: The ASR text.
                 limit:
                   type: integer
                   description: The maximum number of results to return.
