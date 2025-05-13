@@ -108,14 +108,6 @@ def query_post(body):  # noqa: E501
 
     similarity_vector = []
     if 'similaritytext' in body: similarity_vector = vectorize_textinput(body['similaritytext'])
-        # text = tokenizer(body['similaritytext'])
-        # with torch.no_grad():
-        #     text_features = model.encode_text(text)
-        #     text_features /= text_features.norm(dim=-1, keepdim=True)
-        #     similarity_vector = text_features.cpu().numpy().flatten()
-    # for test purposes
-    asr_vector = []
-    if 'asrtext' in body: asr_vector = vectorize_textinput(body['asrtext'])
 
     with get_connection(body['database']) as conn:
         cur = conn.cursor()
@@ -126,58 +118,80 @@ def query_post(body):  # noqa: E501
             cur.execute('SET hnsw.ef_search = %s', (body['limit'],))
 
         if 'ocrtext' in body and not 'similaritytext' in body and not 'asrtext' in body:
-            return ocrtext_query(cur, body, limit)
+            # inputs = body['ocrtext'].split('#')
+
+            # tmp = set([x.segmentid for x in ocrtext_query(cur, inputs[0], limit)])
+            # if len(inputs) > 1:
+            #     for input in inputs[1:]:
+            #         tmp &= set([x.segmentid for x in ocrtext_query(cur, input, limit)])
+            
+            # result = [Scoredsegment(segmentid=x, score=1) for x in tmp]
+            # return result
+
+            # now that i think about it, the below call should suffice  
+            return ocrtext_query(cur, body['ocrtext'], limit)
 
         elif 'similaritytext' in body and not 'ocrtext' in body and not 'asrtext' in body:
-            inputs = body['similaritytext'].split('#')
-
-            tmp = []
-            for input in inputs:
-                vector = vectorize_textinput(input)
-                tmp += similaritytext_query(cur, vector, limit)
+            inputs = [vectorize_textinput(x) for x in body['similaritytext'].split('#') if x != ""]
             
+            tmp = [[]]
+            tmp[0] = similaritytext_query(cur, inputs[0], limit)
+            ids = set([x.segmentid for x in tmp[0]])
+
+            if len(inputs) > 1:
+                for input in inputs[1:]:
+                    # vector = vectorize_textinput(input)
+                    sim = similaritytext_query(cur, input, limit)
+                    tmp.append(sim)
+                    ids &= set([x.segmentid for x in sim])
+
+                if len(ids) < 10:
+                    length = len(tmp)
+                    for i in range(length): 
+                        id = set([x.segmentid for x in tmp[i]]) - ids
+                        id = f"{id}".replace("{", "").replace("}", "")
+                        for j in range(len(inputs)):
+                            if i == j: continue
+                            cur.execute(
+                                f"""
+                                    SELECT id, feature <=> %s AS distance
+                                    FROM features_openclip
+                                    WHERE id  IN ({id})
+                                    ORDER BY distance
+                                    {limit}
+                                """,
+                                (inputs[j],)
+                            )
+                            res = [x for x in evaluate_cursor(cur) if x.score >= 0.17]
+                            print("length before " + str(len(tmp[i])) + ", " + str(len(res)))
+                            tmp[i] += res
+                            print('IDs of ' + str(body['similaritytext'].split("#")[i]) + ' Score of ' + str(body['similaritytext'].split("#")[j]) + ' ' + str(len(tmp[i])))
+
+                        
+
+            tmp = [x for i in range(len(tmp)) for x in tmp[i] ]
             tmp.sort(key=lambda x: x.segmentid)
             result = []
             i = 0
-            while i < (len(tmp) - len(inputs)):
+            while i <= (len(tmp) - len(inputs)):
                 avgElement = [tmp[i].segmentid, tmp[i].score, 1]
                 for j in range((i+1), (len(tmp) - 1 )):
                     if tmp[i].segmentid == tmp[j].segmentid:
                         avgElement[1] += tmp[j].score
                         avgElement[2] += 1
 
-                if avgElement[2] >= len(inputs) :
+                if avgElement[2] >= len(inputs):
                     result.append(Scoredsegment(avgElement[0], (avgElement[1] / float(avgElement[2]))))
                 i += avgElement[2]
-            result.sort(key= lambda x: x.score)
 
+            result.sort(key= lambda x: x.score)
+            print("Amount of results " + str(len(result)))
             return result
         
         elif 'asrtext' in body and not 'similaritytext' in body and not 'ocrtext' in body:
-            return asrtext_query(cur, body)
+            return asrtext_query(cur, body['asrtext'], limit)
         
-        elif 'ocrtext' in body and 'similaritytext' in body:
-            # print("combine query")
-            # ocr = ocrtext_query(cur, body, limit)
-            # sim = similaritytext_query(cur, similarity_vector, limit)
-
-            # print("ocr ", len(ocr), "text ", len(sim))
-            # ocr.sort(key=lambda x: x.segmentid)
-            # sim.sort(key=lambda x: x.segmentid)
-            # a = [x.segmentid for x in ocr]
-            # b = [y.segmentid for y in sim]
-            # for i in sim:
-            #     for j in ocr:
-            #         if i.segmentid == j.segmentid:
-            #             print(i.segmentid, " matches ", j.segmentid)
-
-            # res = [(x.segmentid, (x.score + y.score)/2) for x in ocr for y in sim if x.segmentid == y.segmentid]
-            # print("a ", len(a), "b ", len(b))
-            # res = set(a) & set(b)
-            # print("result ", len(res))
-            # return ocr
-        
-            # this query is not behaving as expected, because the amount of results doesnt change based on the similaritytext but only based on the ocr text       
+        elif 'ocrtext' in body and 'similaritytext' in body and not 'asrtext' in body:
             cur.execute(
                 f"""
                     SELECT id, feature <=> %s AS distance
@@ -192,15 +206,66 @@ def query_post(body):  # noqa: E501
                 """,
                 (similarity_vector, body['ocrtext'])
             )
-        elif 'asrtext' in body and 'similaritytext' in body:
-            sim1 = similaritytext_query(cur, similarity_vector, limit)
-            sim2 = similaritytext_query(cur, asr_vector, limit)
 
-            for i in sim1:
-                for j in sim2:
-                    if i.segmentid == j.segmentid:
-                        print(i.segmentid, " matches ", j.segmentid)
+        elif 'asrtext' in body and 'similaritytext' in body and 'ocrtext' not in body:
+            asr = [x.segmentid for x in asrtext_query(cur, body['asrtext'], limit)]
+            ids = f"{asr}".replace("[", "").replace("]", "")
+            cur.execute(
+                f"""
+                    SELECT id, feature <=> %s AS distance
+                    FROM features_openclip
+                    WHERE id  IN ({ids})
+                    ORDER BY distance
+                    {limit}
+                """,
+                (vectorize_textinput(body['similaritytext']),)
+            )
+            # return asrtext_query(cur, body, limit)
+        elif 'asrtext' in body and 'ocrtext' in body and 'similaritytext' not in body:
+            asr = set([x.segmentid for x in asrtext_query(cur, body['asrtext'], limit)])
+            ocr = set([x.segmentid for x in ocrtext_query(cur, body['ocrtext'], limit)])
+            return [Scoredsegment(segmentid=x, score=1) for x in (asr & ocr)]
+        
+        elif 'asrtext' in body and 'ocrtext' in body and 'similaritytext' in body:
+            asr_ocr = [x.segmentid for x in ocrtext_query(cur, body['ocrtext'], limit) if x in asrtext_query(cur, body['asrtext'], limit)]
+            ids =  f"{asr_ocr}".replace("[", "").replace("]", "")
 
+            inputs = body['similaritytext'].split('#')
+
+            tmp = []
+            for input in inputs:
+                cur.execute(
+                    f"""
+                        SELECT id, feature <=> %s AS distance
+                        FROM features_openclip
+                        WHERE id  IN ({ids})
+                        ORDER BY distance
+                        {limit}
+                    """,
+                    (vectorize_textinput(input),)
+                )   
+                tmp += evaluate_cursor(cur)
+            
+            tmp.sort(key=lambda x: x.segmentid)
+            result = []
+            i = 0
+            while i <= (len(tmp) - len(inputs)):
+                avgElement = [tmp[i].segmentid, tmp[i].score, 1]
+                for j in range((i+1), (len(tmp) - 1 )):
+                    if tmp[i].segmentid == tmp[j].segmentid:
+                        avgElement[1] += tmp[j].score
+                        avgElement[2] += 1
+
+                if avgElement[2] >= len(inputs):
+                    result.append(Scoredsegment(avgElement[0], (avgElement[1] / float(avgElement[2]))))
+                i += avgElement[2]
+            result.sort(key= lambda x: x.score)
+            print("Amount of results " + str(len(result)))
+            return result
+        
+        else:
+            return "Not a valid query"
+           
         return evaluate_cursor(cur)
 
 # helping functions for query
@@ -224,24 +289,27 @@ def similaritytext_query(cur, similarity_vector, limit):
     
     return evaluate_cursor(cur)
 
-def ocrtext_query(cur, body, limit):
+def ocrtext_query(cur, input, limit):
     cur.execute(
         f"""
             SELECT id, 0 AS distance
             FROM features_ocr WHERE feature @@ plainto_tsquery(%s)
             {limit}
         """,
-        (body['ocrtext'],))
+        (input,))
     
     return evaluate_cursor(cur)
 
-def asrtext_query(cur, body):
-    return 'TODO: ASR Features'
+def asrtext_query(cur, input, limit):
+    # TODO Implement ASR features
+    # return Scoredsegment(segmentid='dummy_id', score=1)
+    return ocrtext_query(cur, input, limit)
 
 def evaluate_cursor(cur):
     results = cur.fetchall()
-    scored_segments = [Scoredsegment(segmentid=segmentid, score=1 - distance) for (segmentid, distance) in results]
+    scored_segments = [Scoredsegment(segmentid=segmentid, score=1 - distance) for (segmentid, distance) in set(results)]
     print("Amount of results", len(scored_segments))
+    scored_segments.sort(key= lambda x: x.score)
     return scored_segments
 
 #######################################################
