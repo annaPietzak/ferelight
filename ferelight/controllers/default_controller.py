@@ -122,15 +122,9 @@ def query_post(body):  # noqa: E501
             return ocrtext_query(cur, body['ocrtext'], limit)
 
         elif 'similaritytext' in body and not 'ocrtext' in body and not 'asrtext' in body:
-            *inputs, mergeType = [vectorize_textinput(x) for x in body['similaritytext'].split('#') if x != ""]
+            inputs = [vectorize_textinput(x) for x in body['similaritytext'].split('#') if x != ""]
             
-            if mergeType == 'vector_addition':
-                input = np.mean(inputs, axis=0)
-                result = similaritytext_query(cur, input, limit)
-                print("Amount of results " + str(len(result)))
-                return result
-            
-            elif mergeType == 'id_intersection':
+            if 'mergeType' not in body: # or body['mergeType'] == 'id_intersection':
                 tmp = [[]]
                 tmp[0] = similaritytext_query(cur, inputs[0], limit)
                 ids = set([x.segmentid for x in tmp[0]])
@@ -180,6 +174,12 @@ def query_post(body):  # noqa: E501
                     i += avgElement[2]
 
                 result.sort(key= lambda x: x.score)
+                print("Amount of results " + str(len(result)))
+                return result
+            
+            if body['mergeType'] == 'vector_addition':
+                input = np.mean(inputs, axis=0)
+                result = similaritytext_query(cur, input, limit)
                 print("Amount of results " + str(len(result)))
                 return result
         

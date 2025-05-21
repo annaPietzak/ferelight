@@ -12,7 +12,7 @@ class QueryPostRequest(Model):
     Do not edit the class manually.
     """
 
-    def __init__(self, database=None, similaritytext=None, ocrtext=None, asrtext=None, limit=None):  # noqa: E501
+    def __init__(self, database=None, similaritytext=None, ocrtext=None, asrtext=None, mergetype=None, limit=None):  # noqa: E501
         """QueryPostRequest - a model defined in OpenAPI
 
         :param database: The database of this QueryPostRequest.  # noqa: E501
@@ -23,6 +23,8 @@ class QueryPostRequest(Model):
         :type ocrtext: str
         :param asrtext: The asrtext of this QueryPostRequest.  # noqa: E501
         :type asrtext: str
+        :param mergetype: The mergetype of this QueryPostRequest.  # noqa: E501
+        :type mergetype: str
         :param limit: The limit of this QueryPostRequest.  # noqa: E501
         :type limit: int
         """
@@ -31,6 +33,7 @@ class QueryPostRequest(Model):
             'similaritytext': str,
             'ocrtext': str,
             'asrtext': str,
+            'mergetype': str,
             'limit': int
         }
 
@@ -39,6 +42,7 @@ class QueryPostRequest(Model):
             'similaritytext': 'similaritytext',
             'ocrtext': 'ocrtext',
             'asrtext': 'asrtext',
+            'mergetype': 'mergetype',
             'limit': 'limit'
         }
 
@@ -46,6 +50,7 @@ class QueryPostRequest(Model):
         self._similaritytext = similaritytext
         self._ocrtext = ocrtext
         self._asrtext = asrtext
+        self._mergetype = mergetype
         self._limit = limit
 
     @classmethod
@@ -150,6 +155,29 @@ class QueryPostRequest(Model):
         """
 
         self._asrtext = asrtext
+
+    @property
+    def mergetype(self) -> str:
+        """Gets the mergetype of this QueryPostRequest.
+
+        Merge Type for the similaritytext  # noqa: E501
+
+        :return: The mergetype of this QueryPostRequest.
+        :rtype: str
+        """
+        return self._mergetype
+
+    @mergetype.setter
+    def mergetype(self, mergetype: str):
+        """Sets the mergetype of this QueryPostRequest.
+
+        Merge Type for the similaritytext  # noqa: E501
+
+        :param mergetype: The mergetype of this QueryPostRequest.
+        :type mergetype: str
+        """
+
+        self._mergetype = mergetype
 
     @property
     def limit(self) -> int:

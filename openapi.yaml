@@ -202,6 +202,9 @@ paths:
                 asrtext:
                   type: string
                   description: The ASR text.
+                mergetype: 
+                  type: string
+                  description: Merge Type for the similaritytext
                 limit:
                   type: integer
                   description: The maximum number of results to return.
